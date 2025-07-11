@@ -37,7 +37,8 @@ async def get_sensor_data(sensor_id: Optional[str] = None, limit: int = 100,
         response_data = {
             "temperatura": [d for d in simulated_data if d.type == SensorType.TEMPERATURE][:limit],
             "humedad": [d for d in simulated_data if d.type == SensorType.HUMIDITY][:limit],
-            "CO2": [d for d in simulated_data if d.type == SensorType.CO2][:limit]
+            "CO2": [d for d in simulated_data if d.type == SensorType.CO2][:limit],
+            "presion": [d for d in simulated_data if d.type == SensorType.PRESSURE][:limit]
         }
         
         return response_data
@@ -50,7 +51,8 @@ async def get_sensor_data(sensor_id: Optional[str] = None, limit: int = 100,
             response_data = {
                 "temperatura": [d for d in data if d.type == SensorType.TEMPERATURE],
                 "humedad": [d for d in data if d.type == SensorType.HUMIDITY],
-                "CO2": [d for d in data if d.type == SensorType.CO2]
+                "CO2": [d for d in data if d.type == SensorType.CO2],
+                "presion": [d for d in data if d.type == SensorType.PRESSURE]
             }
             return {"message": "Querying all sensors", "data": response_data}
         else:
@@ -66,7 +68,8 @@ def generate_simulated_data(hours: int = 24, sensor_id: Optional[str] = None) ->
     available_sensors = {
         SensorType.TEMPERATURE: ["temp_1", "temp_2", "temp_out"],
         SensorType.HUMIDITY: ["hum_1", "hum_2"],
-        SensorType.CO2: ["co2_1"]
+        SensorType.CO2: ["co2_1"],
+        SensorType.PRESSURE: ["pres_1", "pres_2"]
     }
     
     # Si se especifica un sensor_id, filtrar los sensores a generar
@@ -92,6 +95,9 @@ def generate_simulated_data(hours: int = 24, sensor_id: Optional[str] = None) ->
                 elif sensor_type == SensorType.HUMIDITY:
                     value = round(random.uniform(30.0, 90.0), 2)
                     metadata = {"unit": "%", "variation": round(random.uniform(0.5, 1.5), 2)}
+                elif sensor_type == SensorType.PRESSURE:
+                    value = round(random.uniform(0.0, 20.0), 2)
+                    metadata = {"unit": "kPa", "calibrated": True}
                 else:  # CO2
                     value = round(random.uniform(300.0, 2000.0))
                     metadata = {"unit": "ppm", "calibrated": random.choice([True, False])}

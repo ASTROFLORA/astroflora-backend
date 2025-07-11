@@ -7,6 +7,7 @@ class SensorType(str, Enum):
     TEMPERATURE = "temperatura"
     HUMIDITY = "humedad"
     CO2 = "CO2"
+    PRESSURE = "presion"
 
 class SensorData(BaseModel):
     timestamp: datetime
