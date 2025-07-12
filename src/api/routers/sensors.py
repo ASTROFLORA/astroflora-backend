@@ -37,7 +37,7 @@ async def get_sensor_data(sensor_id: Optional[str] = None, limit: int = 100,
         response_data = {
             "temperatura": [d for d in simulated_data if d.type == SensorType.TEMPERATURE][:limit],
             "humedad": [d for d in simulated_data if d.type == SensorType.HUMIDITY][:limit],
-            "CO2": [d for d in simulated_data if d.type == SensorType.CO2][:limit],
+            "co2": [d for d in simulated_data if d.type == SensorType.CO2][:limit],
             "presion": [d for d in simulated_data if d.type == SensorType.PRESSURE][:limit]
         }
         
@@ -51,7 +51,7 @@ async def get_sensor_data(sensor_id: Optional[str] = None, limit: int = 100,
             response_data = {
                 "temperatura": [d for d in data if d.type == SensorType.TEMPERATURE],
                 "humedad": [d for d in data if d.type == SensorType.HUMIDITY],
-                "CO2": [d for d in data if d.type == SensorType.CO2],
+                "co2": [d for d in data if d.type == SensorType.CO2],
                 "presion": [d for d in data if d.type == SensorType.PRESSURE]
             }
             return {"message": "Querying all sensors", "data": response_data}
