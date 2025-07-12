@@ -8,11 +8,14 @@ from datetime import datetime
 import logging
 from typing import Optional
 from src.services.event_store import EventStoreService
-from src.db.database import get_async_session
+from src.db.database import get_async_session, Base, engine
+from src.auth.router import router as auth_router
+
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class ConnectionManager:
     def __init__(self):
@@ -85,7 +88,7 @@ class ConnectionManager:
                 await self.broadcast(data)
 
                 try:
-                    await asyncio.wait_for(asyncio.sleep(5), timeout=5.0)
+                    await asyncio.wait_for(asyncio.sleep(10), timeout=10.0)
                 except asyncio.TimeoutError:
                     continue
             except asyncio.CancelledError:
@@ -120,6 +123,7 @@ app = FastAPI(
 
 # Configuración de CORS
 origins = [
+    "http://localhost:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "ws://localhost:5173",
@@ -134,6 +138,14 @@ app.add_middleware(
 )
 
 app.include_router(sensors.router, prefix="/sensors", tags=["sensors"])
+app.include_router(auth_router)
+
+# Crear tablas al iniciar
+@app.on_event("startup")
+async def on_startup():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
 
 @app.websocket("/ws/sensors")
 async def websocket_endpoint(websocket: WebSocket):

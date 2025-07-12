@@ -1,5 +1,5 @@
 from sqlalchemy import insert
-from src.db.models import SensorEvent
+from src.models.sensor_event import SensorEvent
 from datetime import datetime
 import logging
 
