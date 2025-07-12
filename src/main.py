@@ -7,6 +7,8 @@ import random
 from datetime import datetime
 import logging
 from typing import Optional
+from src.services.event_store import EventStoreService
+from src.db.database import get_async_session
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -17,6 +19,7 @@ class ConnectionManager:
         self.active_connections = []
         self.data_generator_task: Optional[asyncio.Task] = None
         self._stop_event = asyncio.Event()
+        self.event_store: Optional[EventStoreService] = None
     
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -35,12 +38,11 @@ class ConnectionManager:
                 logger.error(f"Error enviando datos: {e}")
                 self.disconnect(connection)
 
-    async def start_data_generator(self):
-        """Inicia la tarea de generación de datos"""
-        if self.data_generator_task is None or self.data_generator_task.done():
-            self._stop_event.clear()
-            self.data_generator_task = asyncio.create_task(self._generate_sensor_data())
-            logger.info("Generador de datos iniciado")
+    async def start_data_generator(self, event_store: EventStoreService):
+        self._stop_event.clear()
+        self.event_store = event_store
+        self.data_generator_task = asyncio.create_task(self._generate_sensor_data())
+        logger.info("Generador de datos iniciado")
     
     async def stop_data_generator(self):
         """Detiene la tarea de generación de datos"""
@@ -60,49 +62,55 @@ class ConnectionManager:
                 self.data_generator_task = None
 
     async def _generate_sensor_data(self):
-        """Generador real de datos de sensores"""
         while not self._stop_event.is_set():
             try:
                 data = {
                     "temperatura": round(random.uniform(15.0, 35.0), 2),
                     "humedad": round(random.uniform(30.0, 90.0), 2),
-                    "CO2": round(random.uniform(300.0, 2000.0)),
+                    "co2": int(round(random.uniform(300.0, 2000.0))),
                     "presion": round(random.uniform(0.0, 20.0), 2),
                     "timestamp": datetime.now().isoformat()
                 }
-                logger.debug(f"Generando datos: {data}")
+
+                # Guardar en la base de datos
+                if self.event_store:
+                    await self.event_store.save_event({
+                        "temperatura": data["temperatura"],
+                        "humedad": data["humedad"],
+                        "co2": data["co2"],
+                        "presion": data["presion"],
+                        "timestamp": data["timestamp"]
+                    })
+
                 await self.broadcast(data)
-                
-                # Espera con posibilidad de cancelación
+
                 try:
-                    await asyncio.wait_for(
-                        asyncio.sleep(5),
-                        timeout=5.0
-                    )
+                    await asyncio.wait_for(asyncio.sleep(5), timeout=5.0)
                 except asyncio.TimeoutError:
-                    continue  # Normalmente no debería ocurrir
-                
+                    continue
             except asyncio.CancelledError:
-                logger.info("Generador de datos recibió señal de cancelación")
                 break
             except Exception as e:
                 logger.error(f"Error en generador de datos: {e}")
-                await asyncio.sleep(1)  # Esperar antes de reintentar
+                await asyncio.sleep(1)
 
 manager = ConnectionManager()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Iniciar el generador de datos al arrancar
-    await manager.start_data_generator()
+    # Crear sesión para el EventStoreService
+    from src.db.database import async_session
+    session = async_session()
+    event_store = EventStoreService(await session.__aenter__())  # obtener la sesión async
+    await manager.start_data_generator(event_store)
     logger.info("Aplicación iniciada - Servicio de generación de datos activo")
-    
-    yield  # La aplicación está en ejecución
-    
-    # Limpieza al detener
-    await manager.stop_data_generator()
-    logger.info("Aplicación detenida - Limpieza completada")
 
+    yield
+
+    await manager.stop_data_generator()
+    await session.__aexit__(None, None, None)
+    logger.info("Aplicación detenida - Limpieza completada")
+    
 app = FastAPI(
     title="Astroflora APP",
     description="APP para ingesta de datos de sensores desde dispositivos Arduino/ESP32",
