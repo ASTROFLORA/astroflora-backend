@@ -6,18 +6,18 @@ from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from typing import Optional
-
 from src.models.users import User
 from src.db.database import get_async_session
 from .schemas import RegisterRequest, Token
+from src.config.settings import Settings
 
 # Configuración del router
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 # Seguridad
-SECRET_KEY = "1ux14n3sm1c4t"  # ⚠️ usa variables de entorno en producción
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+SECRET_KEY = Settings.SECRET_KEY
+ALGORITHM = Settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = Settings.ACCESS_TOKEN_EXPIRE_MINUTES
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 

@@ -10,7 +10,9 @@ from typing import Optional
 from src.services.event_store import EventStoreService
 from src.db.database import get_async_session, Base, engine
 from src.auth.router import router as auth_router
+import dotenv
 
+dotenv.load_dotenv()
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -88,7 +90,7 @@ class ConnectionManager:
                 await self.broadcast(data)
 
                 try:
-                    await asyncio.wait_for(asyncio.sleep(10), timeout=10.0)
+                    await asyncio.wait_for(asyncio.sleep(30), timeout=30.0)
                 except asyncio.TimeoutError:
                     continue
             except asyncio.CancelledError:
