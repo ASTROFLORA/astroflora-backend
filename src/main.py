@@ -1,13 +1,12 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from src.api.routers import sensors
-from src.services.observability.connection import manager as connection_manager
+from src.api.dependencies import connection_manager
 from src.api.routers.auth.router import router as auth_router
 from src.config.database import init_db, engine
 import dotenv
 import logging
 
-from src.api.dependencies import connection_manager
 
 dotenv.load_dotenv()
 logging.basicConfig(level=logging.INFO)
