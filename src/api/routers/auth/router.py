@@ -7,7 +7,7 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from typing import Optional
 from src.models.orm import User
-from src.db.database import get_async_session
+from src.config.database import get_async_session
 from .schemas import RegisterRequest, Token
 from src.config.settings import Settings
 
@@ -39,7 +39,7 @@ async def get_user_by_username(session: AsyncSession, username: str):
 
 async def authenticate_user(session: AsyncSession, username: str, password: str) -> Optional[User]:
     user = await get_user_by_username(session, username)
-    if not user or not verify_password(password, user.hashed_password):
+    if not user or not verify_password(password, getattr(user, "hashed_password")):
         return None
     return user
 
