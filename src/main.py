@@ -8,16 +8,14 @@ from datetime import datetime
 import logging
 from typing import Optional
 from src.services.event_store import EventStoreService
-from src.db.database import get_async_session, Base, engine
+from src.db.database import Base, engine
 from src.api.routers.auth.router import router as auth_router
 import dotenv
 
 dotenv.load_dotenv()
 
-# Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 class ConnectionManager:
     def __init__(self):
@@ -55,7 +53,6 @@ class ConnectionManager:
             self._stop_event.set()
             self.data_generator_task.cancel()
             try:
-                # Esperar un tiempo razonable para que la tarea se cancele
                 await asyncio.wait_for(self.data_generator_task, timeout=2.0)
             except asyncio.TimeoutError:
                 logger.warning("Tiempo de espera agotado al cancelar generador")
@@ -77,7 +74,6 @@ class ConnectionManager:
                     "timestamp": datetime.now().isoformat()
                 }
 
-                # Guardar en la base de datos
                 if self.event_store:
                     await self.event_store.save_event({
                         "temperatura": data["temperatura"],
@@ -103,10 +99,9 @@ manager = ConnectionManager()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Crear sesión para el EventStoreService
     from src.db.database import async_session
     session = async_session()
-    event_store = EventStoreService(await session.__aenter__())  # obtener la sesión async
+    event_store = EventStoreService(await session.__aenter__())
     await manager.start_data_generator(event_store)
     logger.info("Aplicación iniciada - Servicio de generación de datos activo")
 
@@ -123,7 +118,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configuración de CORS
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
@@ -142,19 +136,16 @@ app.add_middleware(
 app.include_router(sensors.router, prefix="/sensors", tags=["sensors"])
 app.include_router(auth_router)
 
-# Crear tablas al iniciar
 @app.on_event("startup")
 async def on_startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
 
 @app.websocket("/ws/sensors")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
         while True:
-            # Mantener la conexión activa
             data = await websocket.receive_text()
             logger.debug(f"Mensaje recibido: {data}")
     except WebSocketDisconnect:

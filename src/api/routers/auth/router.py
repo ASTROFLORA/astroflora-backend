@@ -11,20 +11,15 @@ from src.db.database import get_async_session
 from .schemas import RegisterRequest, Token
 from src.config.settings import Settings
 
-# Configuración del router
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-# Seguridad
 SECRET_KEY = Settings.SECRET_KEY
 ALGORITHM = Settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = Settings.ACCESS_TOKEN_EXPIRE_MINUTES
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-
-# ==========================
-# 🔐 FUNCIONES DE UTILIDAD
-# ==========================
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
@@ -64,9 +59,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
     except JWTError:
         raise credentials_exception
 
-# ==========================
-# 🟢 ENDPOINT: REGISTRO
-# ==========================
 
 @router.post("/register")
 async def register_user(
@@ -85,9 +77,6 @@ async def register_user(
     await session.commit()
     return {"message": "Usuario creado exitosamente"}
 
-# ==========================
-# 🟢 ENDPOINT: LOGIN
-# ==========================
 
 @router.post("/login", response_model=Token)
 async def login(
@@ -105,9 +94,6 @@ async def login(
     access_token = create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
-# ==========================
-# 🟢 ENDPOINT: USUARIO ACTUAL
-# ==========================
 
 @router.get("/me")
 async def read_me(username: str = Depends(get_current_user)):

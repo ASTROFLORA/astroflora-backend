@@ -3,7 +3,7 @@ from src.models.dto import SensorData
 
 class SensorDataStoreService:
     def __init__(self):
-        self._data = []  # Inicialmente en memoria, luego cambiar a DB
+        self._data = []
     
     def store_sensor_data(self, sensor_data: SensorData) -> bool:
         """Almacena datos de sensores en memoria"""
