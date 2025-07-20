@@ -1,5 +1,5 @@
 from typing import List, Optional
-from src.models.sensor_data import SensorData
+from src.models.dto import SensorData
 
 class SensorDataStoreService:
     def __init__(self):

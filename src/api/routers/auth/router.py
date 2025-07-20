@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from typing import Optional
-from src.models.users import User
+from src.models.orm import User
 from src.db.database import get_async_session
 from .schemas import RegisterRequest, Token
 from src.config.settings import Settings
@@ -20,6 +20,7 @@ ALGORITHM = Settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = Settings.ACCESS_TOKEN_EXPIRE_MINUTES
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
 
 # ==========================
 # 🔐 FUNCIONES DE UTILIDAD

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from src.models.sensor_data import SensorData, SensorType
+from src.models.dto import SensorData, SensorType
 from src.services.sensor_data_store import SensorDataStoreService
 from typing import Optional
 from datetime import datetime, timedelta

@@ -1,6 +1,6 @@
 import asyncio
 from src.db.database import async_session
-from src.models.users import User
+from src.models.orm import User
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

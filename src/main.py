@@ -9,7 +9,7 @@ import logging
 from typing import Optional
 from src.services.event_store import EventStoreService
 from src.db.database import get_async_session, Base, engine
-from src.auth.router import router as auth_router
+from src.api.routers.auth.router import router as auth_router
 import dotenv
 
 dotenv.load_dotenv()
