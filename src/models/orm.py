@@ -1,20 +1,25 @@
-from src.db.database import Base
-from sqlalchemy import Column, Integer, Float, Text, TIMESTAMP, String
+import uuid
+from sqlalchemy import Column, String, Float, TIMESTAMP
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.sql import func
+
+Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False) 
 
 class SensorEvent(Base):
     __tablename__ = "sensor_events"
 
-    id = Column(Integer, primary_key=True, index=True)
-    sensor_id = Column(Text, default="default")
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    sensor_id = Column(String, nullable=False)
+    timestamp = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     temperatura = Column(Float, nullable=False)
     humedad = Column(Float, nullable=False)
-    co2 = Column(Integer, nullable=False)
+    co2 = Column(Float, nullable=False)
     presion = Column(Float, nullable=False)
-    timestamp = Column(TIMESTAMP(timezone=True), nullable=False)

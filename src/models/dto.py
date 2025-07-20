@@ -1,18 +1,10 @@
-from datetime import datetime
 from pydantic import BaseModel
-from typing import Optional
-from enum import Enum
-
-class SensorType(str, Enum):
-    TEMPERATURE = "temperatura"
-    HUMIDITY = "humedad"
-    CO2 = "CO2"
-    PRESSURE = "presion"
+from datetime import datetime
 
 class SensorData(BaseModel):
-    timestamp: datetime
     sensor_id: str
-    value: float
-    type: SensorType
-    device_id: Optional[str] = None
-    metadata: Optional[dict] = None
+    timestamp: datetime  # Mantiene zona horaria si se incluye correctamente en JSON
+    temperatura: float
+    humedad: float
+    co2: float
+    presion: float
