@@ -4,11 +4,11 @@ from src.api.routers import sensors
 from src.api.dependencies import connection_manager
 from src.api.routers.auth.router import router as auth_router
 from src.config.database import init_db, engine
-import dotenv
+#import dotenv
 import logging
 
 
-dotenv.load_dotenv()
+#dotenv.load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(

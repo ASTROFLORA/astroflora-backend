@@ -1,7 +1,7 @@
-from dotenv import load_dotenv
+#from dotenv import load_nv
 import os
 
-load_dotenv()
+#load_dotenv()
 
 class Settings:
     SECRET_KEY: str = os.environ["SECRET_KEY"]
