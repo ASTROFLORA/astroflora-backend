@@ -70,3 +70,6 @@ uvicorn.log
 htmlcov/
 .coverage
 .coverage.*
+
+# IA TOOLS
+CLAUDE.md
