@@ -1,5 +1,6 @@
 import os
-
+#import dotenv
+#dotenv.load_dotenv()
 class Settings:
     SECRET_KEY: str = os.getenv("SECRET_KEY", "default_secret")
     ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
