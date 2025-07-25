@@ -37,7 +37,7 @@ class SensorService:
         self.db.add(new_record)
         await self.db.commit()
 
-        await self.connection_manager.broadcast_json({
+        await self.connection_manager.broadcast({
             "type": "sensor_update",
             "data": redis_data | {"sensor_id": data.sensor_id}
         })
