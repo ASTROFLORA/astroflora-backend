@@ -15,7 +15,6 @@ async def get_redis_client():
 
         _redis_client = aioredis.from_url(
             redis_url,
-            decode_responses=True,
-            ssl=redis_url.startswith("rediss://")
+            decode_responses=True
         )
     return _redis_client
