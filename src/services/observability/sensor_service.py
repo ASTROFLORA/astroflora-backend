@@ -22,7 +22,7 @@ class SensorService:
             "co2": str(data.co2),
         }
 
-        redis_client.hset(redis_key, mapping=redis_data)
+        await redis_client.hset(redis_key, mapping=redis_data)
 
         # --- Guardar en PostgreSQL (Neon) ---
         new_record = SensorEvent(
@@ -37,6 +37,7 @@ class SensorService:
         self.db.add(new_record)
         await self.db.commit()
 
+        # Broadcast a clientes conectados via websocket
         await self.connection_manager.broadcast({
             "type": "sensor_update",
             "data": redis_data | {"sensor_id": data.sensor_id}
